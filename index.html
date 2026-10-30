@@ -1,393 +1,441 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Online Photo Compressor</title>
-    <meta name="description" content="Compress your JPG and PNG photos to your desired KB size online for free.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <style>
-        .pattern-dots { background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
-        html { scroll-behavior: smooth; }
-    </style>
-</head>
-<body class="font-sans text-slate-900 bg-slate-50 min-h-screen flex flex-col selection:bg-blue-200">
+```react
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { 
+  UploadCloud, ImageIcon, Download, Settings, ChevronDown, ChevronUp, 
+  Menu, X, Shield, Zap, CheckCircle, AlertTriangle, FileImage, 
+  RefreshCw, Lock, FastForward, Smartphone, Mail, Info, FileText
+} from 'lucide-react';
 
-    <div id="app"></div>
-
-<script>
 // --- SEO AND ROUTE DATA ---
 const TARGET_SIZES = [10, 15, 20, 30, 40, 50, 100, 200, 500];
 
 const generateSEOContent = (size, specificType = null) => {
-    const isTNPSC = specificType === 'tnpsc';
-    const isPassport = specificType === 'passport';
-    const baseTitle = isTNPSC ? `TNPSC Photo Compressor Online Free` : 
-                      isPassport ? `Passport Size Photo Compressor Online` : 
-                      `Photo Compressor to ${size}KB Online Free`;
-    
-    const baseH1 = isTNPSC ? `Compress Photo for TNPSC Application` : 
-                   isPassport ? `Compress Passport Size Photo Online` : 
-                   `Compress Photo to ${size}KB Online`;
+  const isTNPSC = specificType === 'tnpsc';
+  const isPassport = specificType === 'passport';
+  const baseTitle = isTNPSC ? `TNPSC Photo Compressor Online Free` : 
+                    isPassport ? `Passport Size Photo Compressor Online` : 
+                    `Photo Compressor to ${size}KB Online Free`;
+  
+  const baseH1 = isTNPSC ? `Compress Photo for TNPSC Application` : 
+                 isPassport ? `Compress Passport Size Photo Online` : 
+                 `Compress Photo to ${size}KB Online`;
 
-    let intro = `Need to compress your image to exactly ${size}KB? Our free online photo compressor allows you to instantly reduce your JPG, JPEG, or PNG files to ${size}KB without losing quality. Ideal for online applications, government forms, and portals that have strict file size limits.`;
-    
-    if (isTNPSC) intro = `Applying for Tamil Nadu Public Service Commission (TNPSC) exams? You need your photo and signature to meet strict size requirements. Use our free TNPSC photo compressor to quickly resize your images to the exact KB required by the official portal securely.`;
-    if (isPassport) intro = `Create the perfect passport-size photo for your applications. While physical dimensions matter, many online portals also require the file size to be under a certain limit. Use this tool to compress your passport photo to the required KB size instantly in your browser.`;
+  let intro = `Need to compress your image to exactly ${size}KB? Our free online photo compressor allows you to instantly reduce your JPG, JPEG, or PNG files to ${size}KB without losing quality. Ideal for online applications, government forms, and portals that have strict file size limits.`;
+  
+  if (isTNPSC) intro = `Applying for Tamil Nadu Public Service Commission (TNPSC) exams? You need your photo and signature to meet strict size requirements. Use our free TNPSC photo compressor to quickly resize your images to the exact KB required by the official portal securely.`;
+  if (isPassport) intro = `Create the perfect passport-size photo for your applications. While physical dimensions matter, many online portals also require the file size to be under a certain limit. Use this tool to compress your passport photo to the required KB size instantly in your browser.`;
 
-    return {
-        title: `${baseTitle} | Reduce Image Size`,
-        h1: baseH1,
-        description: `Free online tool to compress image size to ${size}KB. ${isTNPSC ? 'Perfect for TNPSC.' : ''} No registration, no watermarks, secure browser-based compression.`,
-        targetSize: size || 50,
-        content: [
-            { heading: `How to compress an image to ${size}KB?`, body: `1. Click the 'Browse' button or drag and drop your image into the upload area.<br>2. Select ${size}KB from the target size options (or enter a custom size).<br>3. Click 'Compress Image'. Our tool will process your photo locally in your browser.<br>4. Preview the result and click 'Download' to save your newly compressed image.` },
-            { heading: `Why do I need a ${size}KB image?`, body: `Many government portals, university applications, and job recruitment forms have strict file upload limits. If your image is too large, the system will reject it. Compressing to exactly ${size}KB ensures your application goes through smoothly without technical errors.` },
-            { heading: `Will I lose quality?`, body: `Our tool uses an advanced compression algorithm that optimizes the JPEG quality first. In most cases, the visual difference is unnoticeable. If the original image is very large and the target size is very small, the tool may also slightly reduce the dimensions to ensure it hits the ${size}KB mark without looking heavily pixelated.` }
-        ],
-        faqs: [
-            { q: `Is it safe to compress photos here?`, a: `Yes, 100% safe. All compression happens locally inside your web browser. We do not upload, store, or see your photos on our servers.` },
-            { q: `Is this tool completely free?`, a: `Yes, there are no hidden charges, no premium tiers, and no watermarks added to your images.` },
-            { q: `What formats are supported?`, a: `We support JPG, JPEG, and PNG formats. Note that to achieve maximum compression, PNGs with transparency will be converted to JPEGs with a white background.` }
-        ]
-    };
+  return {
+    title: `${baseTitle} | Reduce Image Size`,
+    h1: baseH1,
+    description: `Free online tool to compress image size to ${size}KB. ${isTNPSC ? 'Perfect for TNPSC.' : ''} No registration, no watermarks, secure browser-based compression.`,
+    targetSize: size || 50,
+    content: [
+      {
+        heading: `How to compress an image to ${size}KB?`,
+        body: `1. Click the 'Browse' button or drag and drop your image into the upload area.\n2. Select ${size}KB from the target size options (or enter a custom size).\n3. Click 'Compress Image'. Our tool will process your photo locally in your browser.\n4. Preview the result and click 'Download' to save your newly compressed image.`
+      },
+      {
+        heading: `Why do I need a ${size}KB image?`,
+        body: `Many government portals, university applications, and job recruitment forms have strict file upload limits. If your image is too large, the system will reject it. Compressing to exactly ${size}KB ensures your application goes through smoothly without technical errors.`
+      },
+      {
+        heading: `Will I lose quality?`,
+        body: `Our tool uses an advanced compression algorithm that optimizes the JPEG quality first. In most cases, the visual difference is unnoticeable. If the original image is very large and the target size is very small, the tool may also slightly reduce the dimensions to ensure it hits the ${size}KB mark without looking heavily pixelated.`
+      }
+    ],
+    faqs: [
+      { q: `Is it safe to compress photos here?`, a: `Yes, 100% safe. All compression happens locally inside your web browser. We do not upload, store, or see your photos on our servers.` },
+      { q: `Is this tool completely free?`, a: `Yes, there are no hidden charges, no premium tiers, and no watermarks added to your images.` },
+      { q: `What formats are supported?`, a: `We support JPG, JPEG, and PNG formats. Note that to achieve maximum compression, PNGs with transparency will be converted to JPEGs with a white background.` },
+      { q: `Can I compress from mobile?`, a: `Absolutely! The website is fully responsive and works perfectly on Android and iOS devices.` }
+    ]
+  };
 };
 
 const ROUTES = {
-    '/': { title: 'Free Online Photo Compressor - Reduce Image Size', defaultSize: 50 },
-    '/photo-compressor-to-10kb': generateSEOContent(10),
-    '/photo-compressor-to-20kb': generateSEOContent(20),
-    '/photo-compressor-to-50kb': generateSEOContent(50),
-    '/photo-compressor-to-100kb': generateSEOContent(100),
-    '/photo-compressor-to-200kb': generateSEOContent(200),
-    '/tnpsc-photo-compressor': generateSEOContent(50, 'tnpsc'),
-    '/passport-size-photo-compressor': generateSEOContent(50, 'passport'),
+  '/': { title: 'Free Online Photo Compressor - Reduce Image Size', defaultSize: 50 },
+  '/photo-compressor': generateSEOContent(50),
+  '/photo-compressor-to-10kb': generateSEOContent(10),
+  '/photo-compressor-to-15kb': generateSEOContent(15),
+  '/photo-compressor-to-20kb': generateSEOContent(20),
+  '/photo-compressor-to-30kb': generateSEOContent(30),
+  '/photo-compressor-to-40kb': generateSEOContent(40),
+  '/photo-compressor-to-50kb': generateSEOContent(50),
+  '/photo-compressor-50-kb': generateSEOContent(50),
+  '/photo-compressor-to-100kb': generateSEOContent(100),
+  '/photo-compressor-100-kb': generateSEOContent(100),
+  '/photo-compressor-to-200kb': generateSEOContent(200),
+  '/photo-compressor-to-500kb': generateSEOContent(500),
+  '/online-photo-compressor': generateSEOContent(50),
+  '/photo-compressor-in-kb': generateSEOContent(50),
+  '/photo-compressor-online': generateSEOContent(50),
+  '/jpg-photo-compressor': generateSEOContent(50),
+  '/50kb-photo-compressor': generateSEOContent(50),
+  '/tnpsc-photo-compressor': generateSEOContent(50, 'tnpsc'),
+  '/passport-size-photo-compressor': generateSEOContent(50, 'passport'),
 };
 
-// --- GLOBAL STATE ---
-let currentPath = '/';
-let isMobileMenuOpen = false;
-let currentFile = null;
-let originalPreviewUrl = null;
-let compressedResult = null;
-let isCompressing = false;
-let compressionProgress = 0;
-let errorMessage = null;
-let selectedTargetSize = 50;
-let customTargetSize = '';
-let activeFaqIndex = null;
+// --- COMPRESSION ENGINE ---
+const compressImage = async (file, targetKB, onProgress) => {
+  return new Promise((resolve, reject) => {
+    const targetBytes = targetKB * 1024;
+    const img = new Image();
+    
+    img.onload = async function () {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Convert everything to JPEG for consistent size reduction
+      const outputMimeType = 'image/jpeg';
+      
+      let width = img.width;
+      let height = img.height;
+      
+      // Initial setup
+        canvas.width = width;
+        canvas.height = height;
+        // Fill white background (important for PNG to JPEG)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
 
-// --- COMPRESSION LOGIC ---
-const formatBytes = (bytes, decimals = 2) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-};
+        let minQ = 0.01;
+        let maxQ = 1.0;
+        let bestBlob = null;
+        let bestQuality = maxQ;
+        let currentScale = 1.0;
+        let attempts = 0;
 
-const processImage = async (file, targetKB) => {
-    return new Promise((resolve, reject) => {
-        const targetBytes = targetKB * 1024;
-        const img = new Image();
-        
-        img.onload = async function () {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const outputMimeType = 'image/jpeg';
-            
-            let width = img.width;
-            let height = img.height;
-            
-            canvas.width = width;
-            canvas.height = height;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-            ctx.drawImage(img, 0, 0, width, height);
+        onProgress(10);
 
-            let minQ = 0.01, maxQ = 1.0;
-            let bestBlob = null, currentScale = 1.0, attempts = 0;
+        // Phase 1: Binary Search on Quality
+        while (minQ <= maxQ && attempts < 15) {
+          let midQ = (minQ + maxQ) / 2;
+          let blob = await new Promise(res => canvas.toBlob(res, outputMimeType, midQ));
+          
+          if (blob.size <= targetBytes) {
+            bestBlob = blob;
+            bestQuality = midQ;
+            minQ = midQ + 0.05; // Try to get higher quality while staying under limit
+          } else {
+            maxQ = midQ - 0.05;
+          }
+          attempts++;
+          onProgress(10 + (attempts * 3));
+        }
 
-            updateProgress(10);
-
-            while (minQ <= maxQ && attempts < 15) {
-                let midQ = (minQ + maxQ) / 2;
-                let blob = await new Promise(res => canvas.toBlob(res, outputMimeType, midQ));
-                
-                if (blob.size <= targetBytes) {
-                    bestBlob = blob;
-                    minQ = midQ + 0.05;
-                } else {
-                    maxQ = midQ - 0.05;
-                }
-                attempts++;
-                updateProgress(10 + (attempts * 3));
-            }
-
-            if (!bestBlob || bestBlob.size > targetBytes) {
-                let lastSize = bestBlob ? bestBlob.size : (width * height);
-                while (currentScale > 0.01) {
-                    let sizeRatio = targetBytes / lastSize;
-                    let scaleModifier = Math.min(0.9, Math.max(0.1, Math.sqrt(sizeRatio)));
-                    currentScale = currentScale * scaleModifier;
-                    
-                    width = Math.max(5, Math.floor(img.width * currentScale));
-                    height = Math.max(5, Math.floor(img.height * currentScale));
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, width, height);
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    let blob = await new Promise(res => canvas.toBlob(res, outputMimeType, 0.7));
-                    lastSize = blob.size;
-                    
-                    if(blob.size <= targetBytes) {
-                        let sMinQ = 0.7; let sMaxQ = 1.0;
-                        let scaledBestBlob = blob;
-                        for(let i=0; i<6; i++){
-                            let sMidQ = (sMinQ + sMaxQ)/2;
-                            let sBlob = await new Promise(res => canvas.toBlob(res, outputMimeType, sMidQ));
-                            if(sBlob.size <= targetBytes) {
-                                scaledBestBlob = sBlob;
-                                sMinQ = sMidQ + 0.05;
-                            } else {
-                                sMaxQ = sMidQ - 0.05;
-                            }
-                        }
-                        bestBlob = scaledBestBlob;
-                        break;
+        // Phase 2: If quality reduction isn't enough, scale down dimensions intelligently
+        if (!bestBlob || bestBlob.size > targetBytes) {
+           let lastSize = bestBlob ? bestBlob.size : (width * height);
+           
+           while (currentScale > 0.01) {
+             // Calculate ratio to dynamically reduce scale faster
+         let sizeRatio = targetBytes / lastSize;
+         // Apply square root because area scales quadratically. Max 0.9 to prevent infinite loops.
+         let scaleModifier = Math.min(0.9, Math.max(0.1, Math.sqrt(sizeRatio)));
+         currentScale = currentScale * scaleModifier;
+         
+         width = Math.max(5, Math.floor(img.width * currentScale));
+         height = Math.max(5, Math.floor(img.height * currentScale));
+         
+         canvas.width = width;
+             canvas.height = height;
+             ctx.fillStyle = '#FFFFFF';
+             ctx.fillRect(0, 0, width, height);
+             ctx.drawImage(img, 0, 0, width, height);
+             
+             // Try with a solid mid-quality first
+             let blob = await new Promise(res => canvas.toBlob(res, outputMimeType, 0.7));
+             lastSize = blob.size;
+             
+             if(blob.size <= targetBytes) {
+                 // Target hit! Now try to maximize visual quality at this new small scale
+                 let sMinQ = 0.7; let sMaxQ = 1.0;
+                 let scaledBestBlob = blob;
+                 for(let i=0; i<6; i++){
+                    let sMidQ = (sMinQ + sMaxQ)/2;
+                    let sBlob = await new Promise(res => canvas.toBlob(res, outputMimeType, sMidQ));
+                    if(sBlob.size <= targetBytes) {
+                        scaledBestBlob = sBlob;
+                        sMinQ = sMidQ + 0.05;
+                    } else {
+                        sMaxQ = sMidQ - 0.05;
                     }
-                    updateProgress(Math.min(95, 60 + ((1 - currentScale) * 35)));
-                }
-            }
+                 }
+                 bestBlob = scaledBestBlob;
+                 break;
+             }
+             onProgress(Math.min(95, 60 + ((1 - currentScale) * 35)));
+           }
+        }
 
-            updateProgress(100);
+        onProgress(100);
 
-            if (bestBlob && bestBlob.size <= targetBytes) {
-                resolve({
-                    blob: bestBlob,
-                    url: URL.createObjectURL(bestBlob),
-                    size: bestBlob.size,
-                    wasScaled: currentScale < 1.0,
-                    scalePercent: Math.round(currentScale * 100)
-                });
-            } else {
-                reject(new Error("Could not compress to target size."));
-            }
-        };
-        img.onerror = () => reject(new Error("Invalid image file."));
-        img.src = URL.createObjectURL(file);
-    });
+    if (bestBlob && bestBlob.size <= targetBytes) {
+      resolve({
+        blob: bestBlob,
+        url: URL.createObjectURL(bestBlob),
+        size: bestBlob.size,
+        wasScaled: currentScale < 1.0,
+        scalePercent: Math.round(currentScale * 100)
+      });
+    } else {
+      reject(new Error("Could not compress to target size. Please try a slightly larger target size (KB)."));
+    }
+  };
+  
+  img.onerror = () => reject(new Error("Invalid image file or error reading file."));
+  
+  // Use Object URL instead of FileReader for better reliability and avoiding read errors
+  try {
+    img.src = URL.createObjectURL(file);
+  } catch (err) {
+    reject(new Error("Error reading file data."));
+  }
+});
 };
 
-// --- RENDER LOGIC ---
+// --- COMPONENTS ---
 
-function updateProgress(val) {
-    compressionProgress = val;
-    const bar = document.getElementById('progress-bar-inner');
-    const text = document.getElementById('progress-text');
-    if(bar) bar.style.width = `${val}%`;
-    if(text) text.innerText = `${Math.round(val)}%`;
-}
+const formatBytes = (bytes, decimals = 2) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
 
-function handleFileSelect(file) {
+const FAQAccordion = ({ faqs }) => {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <div className="w-full max-w-3xl mx-auto mt-8 space-y-4">
+      {faqs.map((faq, index) => (
+        <div key={index} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+          <button
+            className="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none hover:bg-slate-50 transition-colors"
+            onClick={() => setOpenIndex(openIndex === index ? null : index)}
+          >
+            <span className="font-semibold text-slate-800">{faq.q}</span>
+            {openIndex === index ? <ChevronUp className="w-5 h-5 text-blue-600" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+          </button>
+          {openIndex === index && (
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 text-slate-600 leading-relaxed">
+              {faq.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ToolComponent = ({ defaultTargetSize = 50 }) => {
+  const [file, setFile] = useState(null);
+  const [originalPreview, setOriginalPreview] = useState(null);
+  const [targetSize, setTargetSize] = useState(defaultTargetSize);
+  const [customSize, setCustomSize] = useState('');
+  
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    setTargetSize(defaultTargetSize);
+  }, [defaultTargetSize]);
+
+  const handleFile = (selectedFile) => {
+    if (!selectedFile) return;
+    if (!selectedFile.type.match(/image\/(jpeg|png|jpg)/i)) {
+      setError("Please select a valid JPG or PNG image.");
+      return;
+    }
+    
+    // Check maximum file size (100MB)
+    const MAX_SIZE_MB = 100;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    if (selectedFile.size > MAX_SIZE_BYTES) {
+      setError(`File is too large. Maximum allowed size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
+    
+    setFile(selectedFile);
+    setOriginalPreview(URL.createObjectURL(selectedFile));
+    setResult(null);
+    setError(null);
+    setProgress(0);
+  };
+
+  const onDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const onDragLeave = () => setIsDragging(false);
+  const onDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleCompress = async () => {
     if (!file) return;
-    if (!file.type.match(/image\/(jpeg|png|jpg)/i)) {
-        errorMessage = "Please select a valid JPG or PNG image.";
-        renderApp(); return;
-    }
-    if (file.size > 100 * 1024 * 1024) {
-        errorMessage = "File is too large. Maximum allowed size is 100MB.";
-        renderApp(); return;
-    }
-    currentFile = file;
-    originalPreviewUrl = URL.createObjectURL(file);
-    compressedResult = null;
-    errorMessage = null;
-    compressionProgress = 0;
-    renderApp();
-}
-
-async function startCompression() {
-    if (!currentFile) return;
-    let target = customTargetSize ? parseFloat(customTargetSize) : selectedTargetSize;
+    let target = customSize ? parseFloat(customSize) : targetSize;
     if (!target || target <= 0) {
-        errorMessage = "Please enter a valid target size.";
-        renderApp(); return;
+      setError("Please select or enter a valid target size in KB.");
+      return;
     }
 
-    isCompressing = true;
-    errorMessage = null;
-    renderApp();
+    setIsCompressing(true);
+    setError(null);
+    setProgress(0);
 
     try {
-        compressedResult = await processImage(currentFile, target);
+      // Simulate slight delay for UI feedback
+      await new Promise(r => setTimeout(r, 300)); 
+      const res = await compressImage(file, target, setProgress);
+      setResult(res);
     } catch (err) {
-        errorMessage = err.message;
+      setError(err.message);
     } finally {
-        isCompressing = false;
-        renderApp();
+      setIsCompressing(false);
+      setProgress(100);
     }
-}
+  };
 
-function downloadImage() {
-    if (!compressedResult || !currentFile) return;
-    const originalName = currentFile.name.replace(/\.[^/.]+$/, ""); 
+  const handleReset = () => {
+    setFile(null);
+    setOriginalPreview(null);
+    setResult(null);
+    setError(null);
+    setProgress(0);
+    setCustomSize('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDownload = () => {
+    if (!result || !result.url || !file) return;
+    
+    // Original naam se extension hatakar .jpg lagana zaroori hai
+    // Kyunki canvas output hamesha JPEG format me deta hai compression ke liye
+    const originalName = file.name.replace(/\.[^/.]+$/, ""); 
     const finalFileName = `compressed_${originalName}.jpg`;
+
+    // Ek temporary link create karke auto-click karwana (Sabse reliable method)
     const link = document.createElement('a');
-    link.href = compressedResult.url;
+    link.href = result.url;
     link.download = finalFileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
+  };
 
-function resetTool() {
-    currentFile = null;
-    originalPreviewUrl = null;
-    compressedResult = null;
-    errorMessage = null;
-    customTargetSize = '';
-    renderApp();
-}
+  return (
+    <div className="w-full max-w-5xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+      <div className="p-6 md:p-10">
+        
+        {/* Upload Area */}
+        {!file && (
+          <div 
+            className={`border-3 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer
+              ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'}`}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <UploadCloud className="w-10 h-10" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2 text-center">Drag & Drop Image Here</h3>
+            <p className="text-slate-500 mb-6 text-center">or click to browse from your device</p>
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              Browse Image
+            </button>
+            <p className="mt-4 text-xs text-slate-400 font-medium tracking-wide uppercase">Supports JPG, JPEG, PNG (Max 100MB)</p>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg, image/png, image/jpg" onChange={(e) => handleFile(e.target.files[0])} />
+          </div>
+        )}
 
-function toggleMobileMenu() {
-    isMobileMenuOpen = !isMobileMenuOpen;
-    renderApp();
-}
-
-function toggleFaq(index) {
-    activeFaqIndex = activeFaqIndex === index ? null : index;
-    renderApp();
-}
-
-function selectSize(size) {
-    selectedTargetSize = size;
-    customTargetSize = '';
-    renderApp();
-}
-
-function handleCustomSize(val) {
-    customTargetSize = val;
-    selectedTargetSize = null;
-    renderApp();
-}
-
-// --- TEMPLATES ---
-
-function renderNavbar() {
-    const isHome = currentPath === '/';
-    return `
-    <nav class="fixed w-full bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <a href="#/" class="flex items-center gap-2 group">
-                    <div class="bg-gradient-to-br from-blue-600 to-purple-600 text-white p-2 rounded-lg">
-                        <i data-feather="image" class="w-5 h-5"></i>
-                    </div>
-                    <span class="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-slate-800">
-                        PhotoCompressor
-                    </span>
-                </a>
-
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#/" class="text-sm font-medium transition-colors ${currentPath === '/' ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}">Home</a>
-                    <a href="#/photo-compressor-to-50kb" class="text-sm font-medium transition-colors ${currentPath.includes('50kb') ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}">Compress to 50KB</a>
-                    <a href="#/tnpsc-photo-compressor" class="text-sm font-medium transition-colors ${currentPath.includes('tnpsc') ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}">TNPSC</a>
-                    <a href="#/about" class="text-sm font-medium transition-colors ${currentPath === '/about' ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}">About</a>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
-                    <button onclick="toggleMobileMenu()" class="text-slate-600 p-2 focus:outline-none">
-                        <i data-feather="${isMobileMenuOpen ? 'x' : 'menu'}"></i>
+        {/* Processing/Result Area */}
+        {file && (
+          <div className="space-y-8">
+            
+            {/* Settings Panel */}
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+              <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-600" /> Compression Settings
+              </h4>
+              
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold text-slate-700">Target File Size (KB)</label>
+                <div className="flex flex-wrap gap-3">
+                  {TARGET_SIZES.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => { setTargetSize(size); setCustomSize(''); }}
+                      className={`py-2 px-4 rounded-xl text-sm font-medium transition-all border
+                        ${targetSize === size && !customSize
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                          : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'}`}
+                    >
+                      {size} KB
                     </button>
+                  ))}
+                  <div className="relative flex-grow max-w-[200px]">
+                    <input 
+                      type="number" 
+                      placeholder="Custom"
+                      value={customSize}
+                      onChange={(e) => { setCustomSize(e.target.value); setTargetSize(null); }}
+                      className={`w-full py-2 px-4 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500
+                        ${customSize ? 'border-blue-500 bg-white' : 'border-slate-300 bg-white'}`}
+                    />
+                    <span className="absolute right-4 top-2 text-sm text-slate-400 font-medium">KB</span>
+                  </div>
                 </div>
-            </div>
-        </div>
+              </div>
 
-        <!-- Mobile Menu Dropdown -->
-        ${isMobileMenuOpen ? `
-        <div class="md:hidden bg-white border-b border-slate-200 absolute w-full shadow-2xl">
-            <div class="px-4 pt-4 pb-8 space-y-2.5 flex flex-col">
-                <a href="#/" class="block px-4 py-3.5 rounded-xl text-base font-semibold ${currentPath === '/' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'text-slate-700'}">Home</a>
-                <a href="#/photo-compressor-to-50kb" class="block px-4 py-3.5 rounded-xl text-base font-semibold ${currentPath === '/photo-compressor-to-50kb' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'text-slate-700'}">Compress to 50KB</a>
-                <a href="#/tnpsc-photo-compressor" class="block px-4 py-3.5 rounded-xl text-base font-semibold ${currentPath === '/tnpsc-photo-compressor' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'text-slate-700'}">TNPSC Compressor</a>
-                <a href="#/about" class="block px-4 py-3.5 rounded-xl text-base font-semibold ${currentPath === '/about' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'text-slate-700'}">About Us</a>
-            </div>
-        </div>
-        ` : ''}
-    </nav>`;
-}
-
-function renderTool() {
-    const sizeButtons = TARGET_SIZES.map(size => `
-        <button onclick="selectSize(${size})" class="py-2 px-4 rounded-xl text-sm font-medium transition-all border ${selectedTargetSize === size && !customTargetSize ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'}">
-            ${size} KB
-        </button>
-    `).join('');
-
-    if (!currentFile) {
-        return `
-        <div class="w-full max-w-5xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden mt-8">
-            <div class="p-6 md:p-10">
-                <div class="border-3 border-dashed border-slate-300 rounded-2xl p-12 flex flex-col items-center justify-center hover:bg-slate-50 cursor-pointer" onclick="document.getElementById('fileUpload').click()">
-                    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
-                        <i data-feather="upload-cloud" class="w-10 h-10"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2 text-center">Click to Upload Image</h3>
-                    <p class="text-slate-500 mb-6 text-center">Supports JPG, JPEG, PNG (Max 100MB)</p>
-                    <button class="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all">Browse Image</button>
-                    <input type="file" id="fileUpload" class="hidden" accept="image/jpeg, image/png, image/jpg" onchange="handleFileSelect(this.files[0])">
+              <div className="mt-8 flex justify-center">
+                {!result && !isCompressing && (
+                  <button 
+                    onClick={handleCompress}
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <Zap className="w-5 h-5" /> Compress Now
+                  </button>
+                )}
+                
+                {isCompressing && (
+                  <div className="w-full md:w-2/3 space-y-2">
+                     <div className="flex justify-between text-sm font-medium text-slate-600">
+                       <span>Compressing...</span>
+                       <span>{progress}%</span>
+                     </div>
+                     <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300 ease-out" style={{ width: `${progress}%` }}></div>
+                     </div>
+                  </div>
+                )}
+              </div>
+              
+              {error && (
+                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-3 border border-red-200">
+                  <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-sm font-medium">{error}</p>
                 </div>
-                ${errorMessage ? `<div class="mt-4 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 text-center font-medium">${errorMessage}</div>` : ''}
-            </div>
-        </div>`;
-    }
-
-    return `
-    <div class="w-full max-w-5xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden mt-8">
-        <div class="p-6 md:p-10 space-y-8">
-            <!-- Settings Panel -->
-            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                <h4 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-feather="settings" class="w-5 h-5 text-blue-600"></i> Settings</h4>
-                <div class="flex flex-wrap gap-3">
-                    ${sizeButtons}
-                    <div class="relative flex-grow max-w-[200px]">
-                        <input type="number" placeholder="Custom" value="${customTargetSize}" oninput="handleCustomSize(this.value)" class="w-full py-2 px-4 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500 ${customTargetSize ? 'border-blue-500 bg-white' : 'border-slate-300 bg-white'}">
-                        <span class="absolute right-4 top-2 text-sm text-slate-400 font-medium">KB</span>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex justify-center">
-                    ${!compressedResult && !isCompressing ? `
-                        <button onclick="startCompression()" class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
-                            <i data-feather="zap"></i> Compress Now
-                        </button>
-                    ` : ''}
-                    
-                    ${isCompressing ? `
-                        <div class="w-full md:w-2/3 space-y-2">
-                            <div class="flex justify-between text-sm font-medium text-slate-600">
-                                <span>Compressing...</span>
-                                <span id="progress-text">${compressionProgress}%</span>
-                            </div>
-                            <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                                <div id="progress-bar-inner" class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all" style="width: ${compressionProgress}%"></div>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-                ${errorMessage ? `<div class="mt-4 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 text-center font-medium">${errorMessage}</div>` : ''}
+              )}
             </div>
 
-            <!-- Preview Area -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Original -->
-                <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm flex flex-col">
-                    <div class="bg
+            {/* Comparison Area */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Original */}
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm flex flex-col">
+                <div className="bg-slate-100 py-3 px-4 border-b border-slate-200 flex justify-between items-center">
+                  <span className="font-semibold text-slate-700 flex items-center gap-2">
+                    <FileImage className="w-4 h-4" /> Original Image
+                  </span>
+                  <span className="text-sm font-bold text-slate-500 bg-white px-3 py-1 rounded
